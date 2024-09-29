@@ -9,8 +9,12 @@ import lombok.*;
 @Setter
 public class RequestEntity {
     private String host;
+    private int port;
+    private String database;
+    private String schema;
+    private String url;
     private String username;
     private String password;
-    private String database;
+    private String type;
     private String destinationPath;
 }

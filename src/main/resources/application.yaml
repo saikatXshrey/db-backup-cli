@@ -1,3 +1,15 @@
 spring:
   application:
     name: db-backup-cli
+
+db:
+  drivers:
+    postgres: org.postgresql.Driver
+    mysql: com.mysql.cj.jdbc.Driver
+    oracle: oracle.jdbc.driver.OracleDriver
+    mssql: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  urls:
+    postgres: jdbc:postgresql://<host>:<port>/<database>?currentSchema=<schema>
+    mysql: jdbc:mysql://<host>:<port>/<database>?currentSchema=<schema>
+    oracle: jdbc:oracle:thin:@<host>:<port>:<database>/<schema>
+    mssql: jdbc:sqlserver://<host>:<port>;databaseName=<database>;schema=<schema>
