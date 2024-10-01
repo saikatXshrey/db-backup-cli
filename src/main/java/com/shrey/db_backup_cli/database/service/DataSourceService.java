@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.Map;
 
 @Service("dataSourceService")
 public class DataSourceService
@@ -107,5 +108,23 @@ public class DataSourceService
                 tableStructure.size());
 
         return tableStructure;
+    }
+
+    @Override
+    public List<Map<String, Object>> getTableData(
+            String tableName
+    ) {
+        String query = String.format("SELECT * FROM %s",
+                tableName);
+
+        LOGGER.info("Start fetching Table Data");
+
+        List<Map<String, Object>> tableData = dataSourceDao
+                .fetchTableData(dataSource, query);
+
+        LOGGER.info("Table Data fetched of size : [{}]",
+                tableData.size());
+
+        return tableData;
     }
 }

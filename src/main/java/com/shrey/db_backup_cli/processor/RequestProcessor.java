@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component("requestProcessor")
 public class RequestProcessor implements
@@ -39,6 +40,7 @@ public class RequestProcessor implements
                 .getTableNames(request);
 
         tables.forEach(table -> {
+            // --------------------- loaders -------------------
             // fetch primaryKey columns
             List<String> primaryKeyColumns = dataSourceService
                     .getPrimaryKeyColumns(request, table);
@@ -47,6 +49,14 @@ public class RequestProcessor implements
             List<TableStructureEntity> tableStructure = dataSourceService
                     .getTableStructure(request, table);
 
+            // fetch table-table
+            List<Map<String, Object>> tableData = dataSourceService
+                    .getTableData(table);
+            // --------------------------------------------------
+
+
+            // ------------------- generators -------------------
+            //  generate table creation query
             String createTableQuery = reportService
                     .generateTableStructure(
                             table,
@@ -54,10 +64,10 @@ public class RequestProcessor implements
                             tableStructure
                     );
 
-            LOGGER.info("Generated table creation query for table : [{}] \n {}",
-                    table,
-                    createTableQuery
-            );
+            //  generate data insert query
+            String dataInsertQuery = reportService
+                    .generateTableDataInsert(table, tableData);
+            // --------------------------------------------------
         });
 
         return null;

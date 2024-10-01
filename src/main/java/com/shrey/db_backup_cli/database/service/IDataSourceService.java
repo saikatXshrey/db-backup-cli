@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public interface IDataSourceService {
@@ -13,4 +14,5 @@ public interface IDataSourceService {
     List<String> getTableNames(RequestEntity request);
     List<String> getPrimaryKeyColumns(RequestEntity request, String tableName);
     List<TableStructureEntity> getTableStructure(RequestEntity request, String tableName);
+    List<Map<String, Object>> getTableData(String tableName);
 }

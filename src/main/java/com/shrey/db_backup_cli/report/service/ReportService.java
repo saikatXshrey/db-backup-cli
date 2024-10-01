@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service("reportService")
@@ -77,9 +78,15 @@ public class ReportService
 
             primaryKeyColumns
                     .forEach(ListUtil
-                            .withCounter((index, column) -> {
+                        .withCounter((index, column) -> {
+                            if ((index + 1) == primaryKeyColumns.size()) {
                                 builder.append(column);
-                            }));
+                            } else {
+                                builder.append(column)
+                                        .append(",")
+                                        .append(" ");
+                            }
+                        }));
 
             builder.append(")");
         }
@@ -87,6 +94,59 @@ public class ReportService
 
         builder.append(System.lineSeparator())
                 .append(")");
+
+        return builder
+                .toString();
+    }
+
+    @Override
+    public String generateTableDataInsert(
+            String tableName,
+            List<Map<String, Object>> tableData
+    ) {
+        StringBuilder builder = new StringBuilder();
+
+        tableData.forEach(ListUtil
+                .withCounter((index, data) -> {
+                    builder.append("INSERT INTO")
+                            .append("\t")
+                            .append(tableName)
+                            .append("\t")
+                            .append("(");
+
+                    // insert column names
+                    data.forEach((key, value) -> {
+                        builder.append(key)
+                                .append(",")
+                                .append(" ");
+                    });
+
+                    // remove last instance
+                    builder
+                        .setLength(builder.length() - 2);
+
+                    builder.append(")")
+                            .append("\t")
+                            .append("VALUES")
+                            .append("\t")
+                            .append("(");
+
+                    // insert value
+                    data.forEach((key, value) -> {
+                        builder.append("'")
+                                .append(value)
+                                .append("'")
+                                .append(",")
+                                .append(" ");
+                    });
+
+                    // remove last instance
+                    builder
+                        .setLength(builder.length() - 2);
+
+                    builder.append(")")
+                            .append(System.lineSeparator());
+                }));
 
         return builder
                 .toString();
