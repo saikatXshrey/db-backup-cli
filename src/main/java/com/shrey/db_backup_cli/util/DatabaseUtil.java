@@ -14,9 +14,9 @@ public class DatabaseUtil {
 
     public static String configureDriver(
             DatabaseSettings settings,
-            String type
+            RequestEntity request
     ) {
-        switch (type) {
+        switch (request.getType()) {
             case POSTGRES -> {
                 return settings.getDrivers().getPostgres();
             }
@@ -112,6 +112,78 @@ public class DatabaseUtil {
                         .readFileToString(MSSQL_TABLE_NAME_PATH)
                         .replace("$DATABASE", request.getDatabase())
                         .replace("$SCHEMA", request.getSchema());
+            }
+
+            default -> {
+                LOGGER.warn("Invalid Database Type!");
+                return null;
+            }
+        }
+    }
+
+    public static String configurePrimaryKeyQuery(
+            RequestEntity request,
+            String tableName
+    ) {
+        switch (request.getType()) {
+            case POSTGRES -> {
+                return ResourceUtil
+                        .readFileToString(POSTGRES_PRIMARYKEY_PATH)
+                        .replace("$TABLE", tableName);
+            }
+
+            case MYSQL -> {
+                return ResourceUtil
+                        .readFileToString(MYSQL_PRIMARYKEY_PATH)
+                        .replace("$TABLE", tableName);
+            }
+
+            case ORACLE -> {
+                return ResourceUtil
+                        .readFileToString(ORACLE_PRIMARYKEY_PATH)
+                        .replace("$TABLE", tableName);
+            }
+
+            case MSSQL -> {
+                return ResourceUtil
+                        .readFileToString(MSSQL_PRIMARYKEY_PATH)
+                        .replace("$TABLE", tableName);
+            }
+
+            default -> {
+                LOGGER.warn("Invalid Database Type!");
+                return null;
+            }
+        }
+    }
+
+    public static String configureTableStructureQuery(
+            RequestEntity request,
+            String tableName
+    ) {
+        switch (request.getType()) {
+            case POSTGRES -> {
+                return ResourceUtil
+                        .readFileToString(POSTGRES_TABLE_STRUCTURE_PATH)
+                        .replace("$TABLE", tableName);
+            }
+
+            case MYSQL -> {
+                return ResourceUtil
+                        .readFileToString(MYSQL_TABLE_STRUCTURE_PATH)
+                        .replace("$TABLE", tableName);
+            }
+
+            case ORACLE -> {
+                return ResourceUtil
+                        .readFileToString(ORACLE_TABLE_STRUCTURE_PATH)
+                        .replace("$TABLE", tableName);
+            }
+
+            case MSSQL -> {
+                return ResourceUtil
+                        .readFileToString(MSSQL_TABLE_STRUCTURE_PATH)
+                        .replace("$TABLE", tableName);
             }
 
             default -> {

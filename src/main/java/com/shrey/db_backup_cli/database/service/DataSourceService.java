@@ -4,6 +4,7 @@ import com.shrey.db_backup_cli.config.DatabaseSettings;
 import com.shrey.db_backup_cli.database.config.DataSourceConfiguration;
 import com.shrey.db_backup_cli.database.dao.DataSourceDao;
 import com.shrey.db_backup_cli.entity.RequestEntity;
+import com.shrey.db_backup_cli.entity.TableStructureEntity;
 import com.shrey.db_backup_cli.util.DatabaseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class DataSourceService
             RequestEntity request
     ) {
         String driverClassName = DatabaseUtil
-                .configureDriver(databaseSettings, request.getType());
+                .configureDriver(databaseSettings, request);
         this.dataSource = dataSourceConfiguration
                 .dynamicDataSource(
                         request.getUrl(),
@@ -47,17 +48,64 @@ public class DataSourceService
                 );
     }
 
+
     @Override
-    public void getTableNames(
+    public List<String> getTableNames(
             RequestEntity request
     ) {
         String query = DatabaseUtil
                 .configureTableNameQuery(request);
 
         LOGGER.info("Start fetching table-names");
+
         List<String> tableNames = dataSourceDao
                 .fetchTableNames(dataSource, query);
+
         LOGGER.info("Table-Names fetched of size : [{}]",
                 tableNames.size());
+
+        return tableNames;
+    }
+
+
+    @Override
+    public List<String> getPrimaryKeyColumns(
+            RequestEntity request,
+            String tableName
+    ) {
+        String query = DatabaseUtil
+                .configurePrimaryKeyQuery(request, tableName);
+
+        LOGGER.info("Start fetching PrimaryKey columns");
+
+        List<String> columns = dataSourceDao
+                .fetchPrimaryKeyColumns(dataSource, query);
+
+        LOGGER.info("PrimaryKey Columns fetched of size : [{}]",
+                columns.size());
+        LOGGER.info("PrimaryKey Columns : {}", columns);
+
+        return columns;
+    }
+
+
+    @Override
+    public List<TableStructureEntity> getTableStructure(
+            RequestEntity request,
+            String tableName
+    ) {
+        String query = DatabaseUtil
+                .configureTableStructureQuery(request, tableName);
+
+        LOGGER.info("Start fetching Table Structure");
+
+        List<TableStructureEntity> tableStructure = dataSourceDao
+                .fetchTableStructure(dataSource, query);
+
+        LOGGER.info("Table Structure fetched for table : [{}], size : [{}]",
+                tableName,
+                tableStructure.size());
+
+        return tableStructure;
     }
 }
