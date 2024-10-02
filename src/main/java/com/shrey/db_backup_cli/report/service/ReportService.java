@@ -167,7 +167,6 @@ public class ReportService
                 .append(creationQuery)
                 .append(System.lineSeparator())
                 .append(System.lineSeparator())
-                .append(System.lineSeparator())
                 .append(insertQuery);
 
         return builder

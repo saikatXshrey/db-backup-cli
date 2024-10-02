@@ -5,14 +5,18 @@ import com.shrey.db_backup_cli.entity.RequestEntity;
 import com.shrey.db_backup_cli.entity.ResponseEntity;
 import com.shrey.db_backup_cli.entity.TableStructureEntity;
 import com.shrey.db_backup_cli.report.service.IReportService;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -32,11 +36,14 @@ public class RequestProcessor implements
 
 
     @Override
+    @SneakyThrows
     public ResponseEntity process(RequestEntity request) {
 
-        final ExecutorService service = Executors.newFixedThreadPool(
+        final ExecutorService executor = Executors.newFixedThreadPool(
                 Math.min(64, Runtime.getRuntime().availableProcessors() * 8)
         );
+
+        final CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
 
         dataSourceService
                 .initializeDataSource(request);
@@ -61,18 +68,31 @@ public class RequestProcessor implements
             // --------------------------------------------------
 
 
-            // ------------------- generators -------------------
-            String generatedQuery = reportService
+            // ------------------- generator -------------------
+            completionService.submit(() -> reportService
                     .generateTotalQuery(
                             table,
                             primaryKeyColumns,
                             tableStructure,
                             tableData
-                    );
-
-            LOGGER.info("{}", generatedQuery);
+                    ));
             // --------------------------------------------------
         });
+
+        //  resolve waiting CompletionService
+        final List<String>
+                reportResponses = new ArrayList<>(tables.size());
+
+        while (reportResponses.size() < tables.size()) {
+            LOGGER.info("Waiting for all responses to come back. Currently received [{}] responses out of [{}]",
+                    reportResponses.size(),
+                    tables.size()
+            );
+
+            reportResponses.add(completionService.take().get());
+        }
+
+        LOGGER.info("query : {}", reportResponses);
 
         return null;
     }
