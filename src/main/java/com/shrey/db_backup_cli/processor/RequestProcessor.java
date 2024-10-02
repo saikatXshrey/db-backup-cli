@@ -52,32 +52,13 @@ public class RequestProcessor implements
         List<String> tables = dataSourceService
                 .getTableNames(request);
 
-        tables.forEach(table -> {
-            // --------------------- loaders -------------------
-            // fetch primaryKey columns
-            List<String> primaryKeyColumns = dataSourceService
-                    .getPrimaryKeyColumns(request, table);
-
-            // fetch table-structure
-            List<TableStructureEntity> tableStructure = dataSourceService
-                    .getTableStructure(request, table);
-
-            // fetch table-table
-            List<Map<String, Object>> tableData = dataSourceService
-                    .getTableData(table);
-            // --------------------------------------------------
-
-
-            // ------------------- generator -------------------
-            completionService.submit(() -> reportService
+        tables.forEach(table -> completionService
+                .submit(() -> reportService
                     .generateTotalQuery(
-                            table,
-                            primaryKeyColumns,
-                            tableStructure,
-                            tableData
-                    ));
-            // --------------------------------------------------
-        });
+                            dataSourceService,
+                            request,
+                            table
+                    )));
 
         //  resolve waiting CompletionService
         final List<String>

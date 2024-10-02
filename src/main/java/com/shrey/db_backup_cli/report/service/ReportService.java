@@ -1,5 +1,7 @@
 package com.shrey.db_backup_cli.report.service;
 
+import com.shrey.db_backup_cli.database.service.IDataSourceService;
+import com.shrey.db_backup_cli.entity.RequestEntity;
 import com.shrey.db_backup_cli.entity.TableStructureEntity;
 import com.shrey.db_backup_cli.util.ListUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -154,13 +156,28 @@ public class ReportService
 
     @Override
     public String generateTotalQuery(
-            String tableName,
-            List<String> primaryKeyColumns,
-            List<TableStructureEntity> tableStructure,
-            List<Map<String, Object>> tableData
+            IDataSourceService dataSourceService,
+            RequestEntity request,
+            String table
     ) {
-        String creationQuery = generateTableStructure(tableName, primaryKeyColumns, tableStructure);
-        String insertQuery = generateTableDataInsert(tableName, tableData);
+        // --------------------- loaders -------------------
+        // fetch primaryKey columns
+        List<String> primaryKeyColumns = dataSourceService
+                .getPrimaryKeyColumns(request, table);
+
+        // fetch table-structure
+        List<TableStructureEntity> tableStructure = dataSourceService
+                .getTableStructure(request, table);
+
+        // fetch table-table
+        List<Map<String, Object>> tableData = dataSourceService
+                .getTableData(table);
+        // --------------------------------------------------
+
+
+        // --------------------- generator -------------------
+        String creationQuery = generateTableStructure(table, primaryKeyColumns, tableStructure);
+        String insertQuery = generateTableDataInsert(table, tableData);
 
         StringBuilder builder = new StringBuilder()
                 .append(System.lineSeparator())
@@ -168,6 +185,7 @@ public class ReportService
                 .append(System.lineSeparator())
                 .append(System.lineSeparator())
                 .append(insertQuery);
+        // ----------------------------------------------------
 
         return builder
                 .toString();
