@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Component("requestProcessor")
 public class RequestProcessor implements
@@ -31,6 +33,10 @@ public class RequestProcessor implements
 
     @Override
     public ResponseEntity process(RequestEntity request) {
+
+        final ExecutorService service = Executors.newFixedThreadPool(
+                Math.min(64, Runtime.getRuntime().availableProcessors() * 8)
+        );
 
         dataSourceService
                 .initializeDataSource(request);
@@ -56,17 +62,15 @@ public class RequestProcessor implements
 
 
             // ------------------- generators -------------------
-            //  generate table creation query
-            String createTableQuery = reportService
-                    .generateTableStructure(
+            String generatedQuery = reportService
+                    .generateTotalQuery(
                             table,
                             primaryKeyColumns,
-                            tableStructure
+                            tableStructure,
+                            tableData
                     );
 
-            //  generate data insert query
-            String dataInsertQuery = reportService
-                    .generateTableDataInsert(table, tableData);
+            LOGGER.info("{}", generatedQuery);
             // --------------------------------------------------
         });
 

@@ -18,4 +18,11 @@ public interface IReportService {
             String tableName,
             List<Map<String, Object>> tableData
     );
+
+    String generateTotalQuery(
+            String tableName,
+            List<String> primaryKeyColumns,
+            List<TableStructureEntity> tableStructure,
+            List<Map<String, Object>> tableData
+    );
 }

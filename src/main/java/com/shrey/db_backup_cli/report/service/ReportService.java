@@ -151,4 +151,26 @@ public class ReportService
         return builder
                 .toString();
     }
+
+    @Override
+    public String generateTotalQuery(
+            String tableName,
+            List<String> primaryKeyColumns,
+            List<TableStructureEntity> tableStructure,
+            List<Map<String, Object>> tableData
+    ) {
+        String creationQuery = generateTableStructure(tableName, primaryKeyColumns, tableStructure);
+        String insertQuery = generateTableDataInsert(tableName, tableData);
+
+        StringBuilder builder = new StringBuilder()
+                .append(System.lineSeparator())
+                .append(creationQuery)
+                .append(System.lineSeparator())
+                .append(System.lineSeparator())
+                .append(System.lineSeparator())
+                .append(insertQuery);
+
+        return builder
+                .toString();
+    }
 }
