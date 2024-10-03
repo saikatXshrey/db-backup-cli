@@ -45,6 +45,7 @@ public class RequestProcessor implements
 
         final CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
 
+        //  initialize source db
         dataSourceService
                 .initializeDataSource(request);
 
@@ -72,8 +73,6 @@ public class RequestProcessor implements
 
             reportResponses.add(completionService.take().get());
         }
-
-        LOGGER.info("query : {}", reportResponses);
 
         return null;
     }
