@@ -6,6 +6,8 @@ import com.shrey.db_backup_cli.entity.TableStructureEntity;
 import com.shrey.db_backup_cli.util.ListUtil;
 import com.shrey.db_backup_cli.util.ResourceUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.Objects;
 @Service("reportService")
 public class ReportService
         implements IReportService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportService.class);
 
     @Override
     public String generateTableStructure(
@@ -189,12 +193,15 @@ public class ReportService
                 .toString();
 
         // generate sql file inside destination folder
-        String path = request.getDestinationPath()
-                + "/create_"
-                + table
-                + ".sql";
+        String fileName = "create_table_" + table + ".sql";
+        String path = request.getDestinationPath() + "/" + fileName;
         ResourceUtil
                 .writeStringToFile(query, path);
+
+        LOGGER.info("Created file : [{}] to destination : [{}]",
+                fileName,
+                path
+        );
         // ----------------------------------------------------
 
         return query;
